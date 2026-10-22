@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const $$ = require('cheerio');
 const fs = require('fs');
 const { parseDescription } = require('../utils');

@@ -1,21 +1,34 @@
 const fs = require("fs");
+const { randomUUID } = require("crypto");
 
 class DB {
   constructor(file) {
     this.file = file;
-    if (!fs.existsSync(this.file)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(this.file, "utf8"));
+      if (!data || typeof data.entries !== "object" || !data.entries || Array.isArray(data.entries)) {
+        throw new SyntaxError("Invalid cache format");
+      }
+      this.db = data;
+    } catch (error) {
+      if (error.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
       this.db = {
         version: 0,
         entries: {},
       };
       this.save();
-    } else {
-      this.db = JSON.parse(fs.readFileSync(this.file).toString());
     }
   }
 
   save() {
-    fs.writeFileSync(this.file, JSON.stringify(this.db, null, 2));
+    const temp = `${this.file}.${process.pid}.${randomUUID()}.tmp`;
+    try {
+      fs.writeFileSync(temp, JSON.stringify(this.db, null, 2), { mode: 0o600 });
+      fs.renameSync(temp, this.file);
+    } catch (error) {
+      fs.rmSync(temp, { force: true });
+      throw error;
+    }
   }
 
   get(key) {

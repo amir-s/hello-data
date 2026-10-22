@@ -1,7 +1,7 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 const Koa = require("koa");
-const Router = require("koa-router");
+const Router = require("@koa/router");
 const cors = require("@koa/cors");
 const logger = require("koa-logger");
 
@@ -14,18 +14,20 @@ const { getImage, getStock, getCrypto, getWeather } = require("./utils");
 const app = new Koa();
 const router = new Router();
 
-const db = new DB("./cache.json");
+const db = new DB(process.env.CACHE_FILE || "./cache.json");
 
 router.get("/v1/photo/random", (ctx) => {
   const index = Math.floor(Math.random() * photos.length);
   ctx.body = photos[index];
 });
 
-router.get("/v1/photo/:index?", async (ctx) => {
+const photoByIndex = async (ctx) => {
   ctx.body = await getImage(~~ctx.params.index);
-});
+};
+router.get("/v1/photo", photoByIndex);
+router.get("/v1/photo/:index", photoByIndex);
 
-router.get("/v1/stock/:symbol/:market?", async (ctx) => {
+const stockBySymbol = async (ctx) => {
   const symbol = ctx.params.symbol.replace(/\s/g, "").toUpperCase();
   const format = (ctx.query.format || "json").toLowerCase();
 
@@ -62,7 +64,9 @@ router.get("/v1/stock/:symbol/:market?", async (ctx) => {
   } else if (format === "text") {
     ctx.body = data.price;
   }
-});
+};
+router.get("/v1/stock/:symbol", stockBySymbol);
+router.get("/v1/stock/:symbol/:market", stockBySymbol);
 
 router.get("/v1/crypto/:handle", async (ctx) => {
   const format = (ctx.query.format || "json").toLowerCase();
@@ -118,13 +122,25 @@ router.get("/version", (ctx) => {
   ctx.body = { version: "0.0.7" };
 });
 
-router.get("*", (ctx) => {
+router.get("/deploy-revision.txt", (ctx) => {
+  ctx.type = "text/plain";
+  ctx.body = process.env.APP_REVISION || "";
+});
+
+router.get("/healthz", (ctx) => {
+  ctx.body = { status: "ok", revision: process.env.APP_REVISION || null };
+});
+
+router.get("/{*path}", (ctx) => {
   ctx.status = 404;
   ctx.body = "Not found";
 });
 
 app.use(logger()).use(cors()).use(router.routes()).use(router.allowedMethods());
 
-app.listen(process.env.PORT, () =>
-  console.log(`Started server on port #${process.env.PORT}`)
-);
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Started server on port #${port}`));
+}
+
+module.exports = app;

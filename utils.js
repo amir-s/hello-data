@@ -1,6 +1,4 @@
-const fetch = require("node-fetch");
 const cheerio = require("cheerio");
-const pretty = require("pretty");
 
 async function getImage(index = 0) {
   const URL = `https://www.bing.com/HPImageArchive.aspx?format=js&idx=${index}&n=1`;
@@ -91,7 +89,6 @@ async function getStock(symbol, market = "NYSE") {
   const currency = $("div.QuoteStrip-quoteStripSubHeader span:last-child")
     .text()
     .replace(" | ", "");
-  const marketName = $(".QuoteStrip-symbolAndExchange").text();
 
   return {
     symbol: symbol.toUpperCase(),
@@ -141,7 +138,7 @@ async function getWeather(city) {
       .parent()
       .find("div.BNeawe > div")
       .each(function () {
-        data.push(cheerio(this).text());
+        data.push($(this).text());
       });
 
     const [temperatureString, detail] = data;

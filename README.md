@@ -17,12 +17,12 @@ The stock cache lasts 60 seconds. Set `CACHE_FILE=/data/cache.json` to store it 
 
 ## Deploy
 
-Production hostname: `hello-data.amirs.dev`. After review, push `feat/pet-project-migration`, then run:
+Production hostname: `hello-data.amirs.dev`. Push the reviewed `master` commit, then run:
 
 ```sh
 npm run deploy
 ```
 
-This command requires a clean working tree and an exact match between local `HEAD` and the live `origin/feat/pet-project-migration` tip. It sends that full SHA to `/usr/local/sbin/pet-project-deploy-root` over existing root SSH at `143.110.220.15`. The host wrapper independently validates the project and pushed revision before building and switching the container.
+This command requires a clean working tree and an exact match between local `HEAD` and the live `origin/master` tip. It sends that full SHA to `/usr/local/sbin/pet-project-deploy-root` over existing root SSH at `143.110.220.15`. The host wrapper independently validates the project and pushed revision before building and switching the container.
 
 `DEPLOY_SSH_DESTINATION` and `DEPLOY_REMOTE_EXECUTABLE` override the transport for tests or a separately reviewed host change. No SSH credential is stored in this repository.

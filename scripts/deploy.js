@@ -1,6 +1,6 @@
 const { spawnSync } = require("node:child_process");
 
-const branch = "refs/heads/feat/pet-project-migration";
+const branch = "refs/heads/master";
 const project = "hello-data.amirs.dev";
 
 function git(args) {

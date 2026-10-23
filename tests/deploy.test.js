@@ -6,7 +6,7 @@ const { join, resolve } = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const deployScript = resolve(__dirname, "../scripts/deploy.js");
-const branch = "feat/pet-project-migration";
+const branch = "master";
 
 function run(command, args, cwd, env = process.env) {
   return spawnSync(command, args, { cwd, env, encoding: "utf8" });
